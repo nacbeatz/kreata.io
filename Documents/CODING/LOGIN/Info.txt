@@ -1,0 +1,8 @@
+Project Start: 19.10.2024
+
+Run SERVER  :    npm run dev
+Run FRONTEND:    npm run start
+
+AUTHENTICATION VIDEO: https://www.youtube.com/watch?v=pmvEgZC55Cg (43:12min)
+Dashboard codes : https://github.com/burakorkmez/react-admin-dashboard
+GOOGLE OAUTH2: https://www.youtube.com/watch?v=Q0a0594tOrc(10:00)
