@@ -5,15 +5,22 @@ import LoginForm from './components/LoginPage';
 import { User } from './types';
 import './App.css';
 
-interface LoginFormProps {
-  onLogin: (user: User) => void;
-  onRegister: (user: User) => void;
+interface Channel {
+  id: string;
+  title: string;
+  description: string;
+}  
+interface DashboardProps {
+  user: User;
+  onLogout: () => Promise<void>;
+  channels: Channel[];
 }
 
 const App: React.FC = () => {
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [userChannels, setUserChannels] = useState<Channel[]>([]);
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null); // Initialize as null
   const [credits, setCredits] = useState<number>(0);
 
@@ -36,8 +43,8 @@ const App: React.FC = () => {
     setIsLoading(false); // Done loading
   }, []);
 
+ 
   const handleLogin = async (user: { username: string; password: string }) => {
-    console.log('User attempting to log in:', user);
     setIsLoading(true);
 
     try {
@@ -56,6 +63,7 @@ const App: React.FC = () => {
 
       // Update state with user data
       setLoggedInUser(userData.user);
+      setUserChannels(userData.channels);
       setIsFirstTime(userData.user.isFirstLogin); // Extract `isFirstLogin` from the response
       setCredits(userData.user.credits || 0);
 
@@ -115,22 +123,39 @@ const App: React.FC = () => {
 
   return (
     <div className="logged-in-container">
+     <div>
       {isLoading ? (
         <span>Loading...</span>
       ) : error ? (
         <p>{error}</p>
-      ) : loggedInUser ? (
-        <div>
+      ) : loggedInUser ? 
+
+
+
+
+
+         isFirstTime? // Is first time
+
+
+       
           <Dashboard
             user={loggedInUser}
             onLogout={handleLogout}
             isFirstTime={isFirstTime}
             credits={credits} 
           />
-        </div>
-      ) : (
+       
+            :  null   // Is not first time
+
+
+
+
+
+
+       : ( // end is logged in
         <LoginForm onLogin={handleLogin} onRegister={handleRegister} />
       )}
+       </div>
     </div>
   );
 };

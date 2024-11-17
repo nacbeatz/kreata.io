@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const User = require('../models/userModel');
+const Channels = require('../models/ytChannelModel');
 const generateTokenAndSetCookies = require('../utils/generateTokenAndSetCookies')
 
 const register = async (req, res) => {
@@ -66,6 +67,8 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'Wrong password' });
         }
 
+const channels = await Channels.findOne({ owner:user._id });
+console.log(channels);
         const token = jwt.sign(
             { id: user._id, role: user.role },
             process.env.JWT_SECRET,
@@ -80,6 +83,7 @@ const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
+      
         // Include isFirstLogin in the response
         res.status(200).json({
             success: true,
@@ -90,8 +94,9 @@ const login = async (req, res) => {
                 username: user.username,
                 email: user.email,
                 role: user.role,
-                isFirstLogin: user.isFirstLogin // Include the isFirstLogin flag
-            }
+                isFirstLogin: user.isFirstLogin,   
+            },
+            channels: channels.length > 0 ? channels : [],
         });
     } catch (err) {
         console.error(err);

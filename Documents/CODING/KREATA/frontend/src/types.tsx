@@ -6,12 +6,9 @@ export interface User {
     authToken?: string;
   }
   
-  export interface DashboardProps {
-    user: User;
-    onLogout: () => Promise<void>;
-  }
-  
+
   export interface LoginFormProps {
     onLogin: (user: User) => void;
     onRegister: (user: User) => void;
   }
+

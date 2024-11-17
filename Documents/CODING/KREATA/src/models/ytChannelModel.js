@@ -17,9 +17,12 @@ const VideoSchema = new mongoose.Schema({
 const ChannelSchema = new mongoose.Schema({
   channelId: { type: String, required: true, unique: true },
   title: { type: String, required: true },
+  handle: { type: String, required: true },
+  profile: { type: String, required: false },
   description: { type: String },
   country: { type: String },
-  publishedAt: { type: Date },
+  owner: { type: String },
+  publishedAt: { type: String },
   subscriberCount: { type: Number, default: 0 },
   viewCount: { type: Number, default: 0 },
   videoCount: { type: Number, default: 0 },
