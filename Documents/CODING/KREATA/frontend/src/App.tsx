@@ -10,6 +10,7 @@ interface Channel {
   title: string;
   description: string;
 }  
+
 interface DashboardProps {
   user: User;
   onLogout: () => Promise<void>;

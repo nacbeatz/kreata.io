@@ -1,5 +1,6 @@
 // src/controllers/channelController.js
 const Channel = require('../models/ytChannelModel');
+const { lastTenVideos, topTenVideos } = require('../utils/fetchVideos');
 const dotenv = require('dotenv').config();
 
 // Save channels to MongoDB
@@ -36,61 +37,69 @@ const saveChannels = async (req, res) => {
   }
 
 };
-
 const addChannel = async (req, res) => {
   const channel_Id = req.body.channelId;
   const userId = req.body.user.id;
 
-try {
-  const savedChannels = [];
-  let existingChannel = await Channel.findOne({ channelId: channel_Id });
+  try {
+    const savedChannels = [];
+    let existingChannel = await Channel.findOne({ channelId: channel_Id });
 
-  if (!existingChannel) {
-    //Channel does not exist!
-    const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channel_Id}&key=${process.env.YT_DATA_API_KEY}`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-          console.log('Fetching url went wrong');
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const channel = await response.json();
-        const newChannel = new Channel({
-          channelId: channel.items[0].id,
-          title: channel.items[0].snippet.title,
-          handle: channel.items[0].snippet.customUrl,
-          description: channel.items[0].snippet.description,
-          owner: userId,
-          thumbnailUrl: channel.items[0].snippet.thumbnails.medium.url,
-          subscriberCount: channel.items[0].statistics.subscriberCount,
-          profile: channel.items[0].snippet.thumbnails.default.url,
-          country:channel.items[0].snippet.country ,
-          publishedAt: channel.items[0].snippet.publishedAt.split('T')[0],
-          subscriberCount: channel.items[0].statistics.subscriberCount,
-          viewCount:channel.items[0].statistics.viewCount,
-          videoCount:channel.items[0].statistics.videoCount,
-        
-        });
-         //'Fetched channel saved successfuly'
-        await newChannel.save();
-        savedChannels.push(newChannel);
-      } catch (error) {
-        //Error Fetching the YT DATA API;
-        console.error('Error fetching Channel Data:', error);
-        return [];
+    if (!existingChannel) {
+      console.log('Channel does not exist. Fetching details...');
+
+      const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channel_Id}&key=${process.env.YT_DATA_API_KEY}`;
+      const response = await fetch(channelUrl);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch channel details: ${response.statusText}`);
+      }
+
+      const channelData = await response.json();
+      const channel = channelData.items[0];
+
+      if (!channel) {
+        throw new Error('No channel data found for the given ID.');
+      }
+
+  
+      const lastTen = await lastTenVideos(channel_Id, process.env.YT_DATA_API_KEY);
+      const topTen = await topTenVideos(channel_Id, process.env.YT_DATA_API_KEY);
+
+
+      const newChannel = new Channel({
+        channelId: channel.id,
+        title: channel.snippet.title,
+        handle: channel.snippet.customUrl,
+        description: channel.snippet.description,
+        owner: userId,
+        thumbnailUrl: channel.snippet.thumbnails.medium.url,
+        subscriberCount: channel.statistics.subscriberCount,
+        profile: channel.snippet.thumbnails.default.url,
+        country: channel.snippet.country,
+        publishedAt: channel.snippet.publishedAt.split('T')[0],
+        viewCount: channel.statistics.viewCount,
+        videoCount: channel.statistics.videoCount,
+        latestVideos: lastTen,
+        topVideos: topTen,
+      });
+
+      console.log('Saving channel to database...');
+      await newChannel.save();
+      savedChannels.push(newChannel);
+      console.log('Channel saved successfully.');
+    } else {
+      console.log('Channel already exists.');
+      savedChannels.push(existingChannel);
     }
 
-} else {
-  // 'Channel exist already!
-        savedChannels.push(existingChannel);
-      }
     res.status(200).json(savedChannels);
   } catch (error) {
-    // Error Adding Channel
     console.error('Error adding channel:', error);
     res.status(500).json({ message: 'This channel cannot be added' });
   }
 };
+
 
 module.exports = {
   saveChannels, addChannel

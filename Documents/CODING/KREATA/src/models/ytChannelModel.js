@@ -26,7 +26,7 @@ const ChannelSchema = new mongoose.Schema({
   subscriberCount: { type: Number, default: 0 },
   viewCount: { type: Number, default: 0 },
   videoCount: { type: Number, default: 0 },
-  topVideos: { type: [VideoSchema], default: [], validate: [v => v.length <= 5, '{PATH} exceeds the limit of 5'] },
+  topVideos: { type: [VideoSchema], default: [], validate: [v => v.length <= 10, '{PATH} exceeds the limit of 10'] },
   latestVideos: { type: [VideoSchema], default: [], validate: [v => v.length <= 10, '{PATH} exceeds the limit of 10'] },
   keywords: { type: [String], default: [] }, // Channel-level keywords
   createdAt: { type: Date, default: Date.now },

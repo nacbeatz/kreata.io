@@ -26,9 +26,7 @@ app.use(cors({
 
 dbConnect();
 
-
 // Middleware to parse JSON and URL-encoded data
-
 
 //Configure session middleware
 app.use(session({
