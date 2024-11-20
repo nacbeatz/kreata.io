@@ -66,9 +66,8 @@ const login = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ message: 'Wrong password' });
         }
-
-const channels = await Channels.findOne({ owner:user._id });
-console.log(channels);
+        let channels = [];
+        channels = await Channels.find({ owner:user._id });
         const token = jwt.sign(
             { id: user._id, role: user.role },
             process.env.JWT_SECRET,

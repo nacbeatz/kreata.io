@@ -16,6 +16,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const [message, setMessage] = useState<string>('');
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [userChannels, setUserChannels]= useState<boolean>;
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
     const endpoint = isLogin ? 'login' : 'register';
 
     try {
-      console.log('FE sent: '+username+' '+password+' '+role);
       const response = await fetch(`http://localhost:4000/api/auth/${endpoint}`, {
         method: 'POST',
         headers: {
@@ -52,7 +52,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
             username,
             password,
             role: data.role || 'user', 
+            channels: data.channels,
           });
+          console.log(data.channels)
           onLogin({ username,password, role: data.role || 'user' });
         } else {
           onRegister({ username, email, password, role });
