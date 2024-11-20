@@ -16,7 +16,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const [message, setMessage] = useState<string>('');
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
-  const [userChannels, setUserChannels]= useState<boolean>;
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
