@@ -6,3 +6,189 @@ Run FRONTEND:    npm run start
 AUTHENTICATION VIDEO: https://www.youtube.com/watch?v=pmvEgZC55Cg (43:12min)
 Dashboard codes : https://github.com/burakorkmez/react-admin-dashboard
 GOOGLE OAUTH2: https://www.youtube.com/watch?v=Q0a0594tOrc(10:00)
+
+
+
+
+
+
+
+1. Key Metrics
+===============
+These are the main quantitative metrics that you can retrieve. You specify these in the metrics parameter when querying the API.
+
+views: Total views for a video or channel.
+likes: Total likes received.
+dislikes: Total dislikes received.
+comments: Number of comments received.
+shares: Number of times content was shared.
+subscribersGained: New subscribers gained.
+subscribersLost: Subscribers lost.
+averageViewDuration: Average time spent watching a video.
+estimatedMinutesWatched: Estimated total watch time in minutes.
+estimatedRevenue: Estimated total revenue.
+estimatedAdRevenue: Revenue from ads.
+grossRevenue: Total revenue including ad and non-ad revenue.
+monetizedPlaybacks: Number of monetized playbacks (views with ads).
+playbackBasedCpm: Cost per thousand monetized playbacks.
+adImpressions: Number of ad impressions delivered.
+cpm: Average cost per thousand ad impressions.
+
+
+
+2. Video Performance and Engagement Metrics
+============================================
+cardImpressions: Number of times video cards were displayed.
+cardClicks: Number of clicks on video cards.
+endScreenImpressions: Number of end screen impressions.
+endScreenClicks: Number of clicks on end screen elements.
+annotationClickThroughRate: Click-through rate of annotations.
+annotationCloseRate: Percentage of viewers who closed an annotation.
+
+
+
+3. Traffic Sources
+==================
+Metrics segmented by traffic sources, providing insights into where your viewers come from:
+
+YouTube Search: Traffic from YouTube search results.
+External: Traffic from external websites.
+Direct or Unknown: Direct traffic or from untracked sources.
+Suggested Videos: Traffic from suggested videos.
+Playlists: Traffic from playlists.
+Channel Pages: Traffic from YouTube channel pages.
+Browse Features: Traffic from browsing features on YouTube, like the homepage.
+
+
+4. Geography & Demographics
+==========================
+Metrics by geographic location and audience demographics.
+
+Geography:
+
+        Country-based data: Metrics can be segmented by country.
+        Region: Available in more detailed reports.
+Demographics:
+
+        ageGroup: Viewer age groups (e.g., 18-24, 25-34).
+        gender: Viewer gender.
+        Viewer Percentages: For age and gender categories.
+
+5. Device and Playback Metrics
+==============================
+Metrics based on the devices and methods viewers use to watch content.
+
+Device Types:
+
+    Computer
+    Mobile
+    Tablet
+    Game console
+    TV
+    Unknown
+Playback Types:
+
+    Embedded Players: Views from embedded players on external sites.
+    YouTube Watch Page: Views directly from the YouTube website or app.
+
+6. Subscription Status
+======================
+Metrics that separate viewership between subscribed and unsubscribed viewers.
+
+subscribedStatus: Metrics split by whether users are subscribed to the channel or not.
+
+
+7. Revenue and Monetization Metrics
+===================================
+Metrics related to revenue generation and monetization activities.
+
+adImpressionBasedCpm: Revenue per thousand ad impressions.
+monetizedPlaybacks: Number of views that were monetized.
+estimatedRevenue: Estimated earnings from the channel.
+estimatedAdRevenue: Revenue from ads specifically.
+grossRevenue: Total revenue, including ad and transaction revenue.
+
+
+8. Playback Location
+====================
+Metrics based on the location where the video was played.
+
+YouTube Watch Page
+Embedded Player: Views from embedded YouTube players on external sites.
+
+9. Live Stream Metrics
+======================
+Specific metrics for live-streamed content.
+
+liveOrOnDemand: Distinguishes between live-streamed and on-demand (non-live) content.
+concurrentViewers: Peak number of concurrent viewers during a live stream.
+liveViewers: Views while the stream was live.
+
+
+10. Advanced Dimensions for Detailed Segmentation
+=================================================
+In addition to metrics, the YouTube Analytics API provides dimensions for more precise analysis. Some commonly used dimensions include:
+
+day: Daily metrics.
+month: Monthly metrics.
+video: Metrics for individual videos.
+channel: Channel-level metrics.
+playlist: Metrics for playlists.
+insightTrafficSourceType: Breaks down traffic by source (e.g., YouTube search, suggested videos).
+insightPlaybackLocationType: Playback location (e.g., YouTube page or embedded).
+subscribedStatus: Whether viewers were subscribed or not.
+country: Country of viewership.
+province: Province/region if available.
+
+
+
+
+USER FLOW
+=========
+1. User Login
+    User Action: 
+        User visits the login page and enters their credentials.
+    System Response:
+        Authenticate the user.
+        If successful, retrieve the user’s profile data, including available credits and channels.
+
+2. Dashboard Access
+    User Action: 
+        After login, the user is directed to the main dashboard page.
+    System Checks:
+        Credit Check: Verify if the user has sufficient credits to access analytics insights.
+        If insufficient credits:
+        Display a notification indicating the need for credits to view insights.
+        Provide a link or CTA to top up credits.
+        Channel Check: Check if the user has added any YouTube channels.
+        If no channel exists:
+        Prompt the user to add a channel to access insights.
+        Redirect the user to the "Add Channel" page if they proceed.
+3. Adding a Channel (If No Channel Exists)
+    User Action: 
+        User selects the option to add a channel.
+    System Response:
+        Display a form to input channel details or connect via an API (e.g., Google OAuth with YouTube permissions).
+        On submission, validate and save the channel details to the database.
+        Update the user’s channel list with the new channel.
+4. Navigating to VIEW INSIGHT Page
+    User Action: 
+        User selects an existing channel and clicks "View Insight" or navigates to the insight page for that channel.
+    System Checks:
+        Credit Deduction: Deduct 1 credit (or specified amount) for accessing analytics.
+        If deduction fails due to insufficient credits:
+        Display a message about low credits and prompt the user to top up.
+        Channel Data Check: Ensure the selected channel has been updated recently.
+        If outdated:
+        Offer the user an option to update the data (using additional credits if needed).
+5. Displaying Analytics Insights
+    User Action: 
+        User reaches the "View Insight" page.
+    System Response:
+        Fetch and display analytics data for the selected channel, including key metrics and visualizations.
+        Present top 5 performing videos, latest 10 videos, and keyword analysis if applicable.
+        Display relevant growth metrics and trends.
+6. Optional: Notifications and Recommendations
+    System Notifications:
+        Display suggestions for improving channel performance or utilizing keywords based on current analytics.
+        Provide CTAs for related actions, such as optimizing SEO, boosting engagement, or updating analytics data.
