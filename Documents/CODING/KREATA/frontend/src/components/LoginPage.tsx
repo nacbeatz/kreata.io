@@ -12,6 +12,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
   const [password, setPassword] = useState<string>('');
   const [role, setRole] = useState<string>('');
   const [email, setEmail] = useState<string>('');
+  const [credits, setCredits] = useState<number | null>(0);
   const [name, setName] = useState<string>('');
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const [message, setMessage] = useState<string>('');
@@ -22,8 +23,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
 
  
- 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -40,20 +39,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onRegister }) => {
       });
 
       const data = await response.json();
+      console.log(data);
 
       if (response.ok) {
         setMessage(data.message);
-        setIsSuccess(true);
+        console.log(data);
+        setIsSuccess(true); 
         localStorage.setItem('authToken', data.token);
 
         if (isLogin) {
           setLoggedInUser({
             username,
             password,
-            role: data.role || 'user', 
-            channels: data.channels,
+            role: data.role || 'user',
+            credits: credits ?? 0,
+            hasChannel:data.hasChannel,
+            userPlan:data.userPlan,
           });
-          console.log(data.channels)
           onLogin({ username,password, role: data.role || 'user' });
         } else {
           onRegister({ username, email, password, role });

@@ -1,15 +1,13 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
 const verifyToken = (req, res, next) => {
-  console.log('Token received on BE is: '+req.cookies.authToken)
   // Check for token in cookies first
   let token = req.cookies.authToken;
 
   // If no token in cookies, check Authorization header
   if (!token) {
     const authHeader = req.headers.authorization || req.headers.Authorization; // Case-insensitive
-    console.log('Token received on BE is: '+authHeader)
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.split(' ')[1];
     }
   }

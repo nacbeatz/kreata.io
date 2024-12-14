@@ -12,8 +12,6 @@ const verifyToken = require('./middlewares/authMiddleware')
 const authorizeRoles = require('./middlewares/roleMiddleware')
 const cookieParser = require('cookie-parser');
 
-
-
 const app = express();
 
 app.use(express.json());
@@ -48,9 +46,7 @@ app.get('/api/users/user',verifyToken, authorizeRoles("admin", "creator","user")
   
     const userDetails = req.cookies.userData;
     if (!userDetails) return res.status(404).json({ message: 'User not found' });
-    
-    console.log("Type of userDetails:", typeof userDetails);
-    console.log("Value of userDetails:", userDetails);
+
     
     if (typeof userDetails === 'string') {
         res.json(JSON.parse(decodeURIComponent(userDetails)));

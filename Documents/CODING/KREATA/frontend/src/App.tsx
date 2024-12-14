@@ -2,20 +2,17 @@ import React, { useState, useEffect } from 'react';
 import Dashboard from './Dashboard';
 import Cookies from 'js-cookie';
 import LoginForm from './components/LoginPage';
-import { User } from './types';
+import { User, Channel } from './types';
 import './App.css';
 
-interface Channel {
-  id: string;
-  title: string;
-  description: string;
-}  
 
-interface DashboardProps {
+interface AppProps {
   user: User;
   onLogout: () => Promise<void>;
-  channels: Channel[];
+ 
 }
+
+
 
 const App: React.FC = () => {
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
@@ -113,10 +110,10 @@ const App: React.FC = () => {
   const handleLogout = async () => {
     try {
       await fetch('http://localhost:4000/api/auth/logout', { method: 'POST', credentials: 'include' });
+      console.log('Loging out....:'+localStorage.getItem('userData'));
       localStorage.removeItem('authToken');
       setLoggedInUser(null);
       setIsFirstTime(null);
-      setCredits(0);
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -124,41 +121,24 @@ const App: React.FC = () => {
 
   return (
     <div className="logged-in-container">
-     <div>
       {isLoading ? (
         <span>Loading...</span>
       ) : error ? (
         <p>{error}</p>
-      ) : loggedInUser ? 
-
-
-
-
-
-         isFirstTime? // Is first time
-
-
-       
-          <Dashboard
-            user={loggedInUser}
-            onLogout={handleLogout}
-            isFirstTime={isFirstTime}
-            credits={credits} 
-          />
-       
-            :  null   // Is not first time
-
-
-
-
-
-
-       : ( // end is logged in
+      ) : loggedInUser ? (
+        <Dashboard
+          user={loggedInUser}
+          onLogout={handleLogout}
+          isFirstTime={isFirstTime} 
+          credits={credits} 
+          
+        />
+      ) : (
         <LoginForm onLogin={handleLogin} onRegister={handleRegister} />
       )}
-       </div>
     </div>
   );
+  
 };
 
 export default App;

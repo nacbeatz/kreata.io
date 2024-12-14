@@ -2,14 +2,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const User = require('../models/userModel');
 const Channels = require('../models/ytChannelModel');
+const Snapshots = require('../models/snapshotsModel');
+const Subscriptions = require('../models/subscriptionsModel');
 const generateTokenAndSetCookies = require('../utils/generateTokenAndSetCookies')
 
 const register = async (req, res) => {
     try {
         const { username, password, role, name, email } = req.body;
 
-        console.log('BE received: ' + username + ' ' + password + ' ' + role);
-
+     
         if (!username || !password || !role) {
             return res.status(400).json({ message: 'All fields are required' });
         }
@@ -29,8 +30,8 @@ const register = async (req, res) => {
             role,
             name,
             verificationToken,
-            verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-            isFirstLogin: true // Mark as first login
+            verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
+            isFirstLogin: true 
         });
 
         await newUser.save();
@@ -53,6 +54,15 @@ const register = async (req, res) => {
 };
 
 
+
+const logout = async (req, res) => { 
+console.log('Logout reaches BE for: '+req.userData);
+res.status(201).json({
+    success: true,
+    message: `You logged successfully!`,
+})
+}
+
 const login = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -66,8 +76,101 @@ const login = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ message: 'Wrong password' });
         }
+
         let channels = [];
-        channels = await Channels.find({ owner:user._id });
+        let referenceChannels = [];
+        channels = await Channels.find({ owner: user._id });
+
+        // Initialize variables
+        let credits = 5;
+        let hasChannel = false;
+        let plan = 'free';
+
+        // Check credits and plan
+        if (user.isFirstLogin) {
+            const existingSubscription = await Subscriptions.findOne({ userId: user._id });
+
+            if (!existingSubscription) {
+                const userPlan = new Subscriptions({
+                    userId: user._id,
+                    plan: plan,
+                    credits: credits,
+                    subscribedAt: Date.now(),
+                    creditsExpireAt: Date.now() + 24 * 60 * 60 * 1000 * 30, // 30 days
+                });
+                await userPlan.save();
+                console.log('FREE subscription plan added!');
+            } else {
+                credits = existingSubscription.credits;
+                if(credits<=3){  
+                    credits = 0;
+                }
+                plan = existingSubscription.plan;
+              
+                const userChannels = await Channels.find({ owner: user._id });
+                if (userChannels.length > 0) {
+                    hasChannel = true;
+                    console.log('This user has ' + userChannels.length + ' channel(s) on our platform');
+                } else {
+                    console.log('This user has no channel on our platform');
+                }
+            }
+
+            await user.save();
+        }
+
+        // Find channels the user is referenced in and format the details
+        const referencedChannels = await Channels.find({ references: user._id });
+        
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        
+        referenceChannels = await Promise.all(
+            referencedChannels.map(async (channel) => {
+                const todaySnapshot = await Snapshots.findOne({
+                    channelId: channel.channelId, // Use the correct channelId from the current channel
+                    updatedAt: {
+                        $gte: todayStart,
+                        $lt: new Date(todayStart.getTime() + 24 * 60 * 60 * 1000),
+                    },
+                });
+                const snapshotData = todaySnapshot?.snapshotData || [];
+                return {
+                    title: channel.title,
+                    profile: channel.profile,
+                    channelId: channel.channelId,
+                    subs: channel.subscriberCount,
+                    views: channel.viewCount,
+                    handle: channel.handle,
+                    description: channel.description,
+                    country: channel.country,
+                    createdAt: channel.createdAt,
+                    publishedAt: channel.publishedAt,
+                    keywords: channel.keywords,
+                    topVideos: channel.topVideos,
+                    latestVideos: channel.latestVideos,
+                    videos: channel.videoCount,
+                    lastUpdate: channel.updatedAt,
+                    snapshotUpdatedAt:todaySnapshot ? todaySnapshot.updatedAt : channel.updatedAt ,
+                    needsUpdate: !todaySnapshot,
+                    gainedSub: snapshotData.length > 0 
+                    ? (snapshotData[snapshotData.length - 1].subscriberCount - channel.subscriberCount).toLocaleString() 
+                    : 0,
+                    gainedViews: snapshotData.length > 0 
+                    ? (snapshotData[snapshotData.length - 1].viewCount - channel.viewCount).toLocaleString() 
+                    : 0,
+                    videoMade: snapshotData.length > 0 
+                    ? (snapshotData[snapshotData.length - 1].videoCount - channel.videoCount).toLocaleString() 
+                    : 0,
+                };
+            })
+        );
+        
+        const outdatedChannels = referenceChannels
+        .filter(channel => channel.needsUpdate)
+        .map(channel => channel.channelId);
+
+        // Generate a token
         const token = jwt.sign(
             { id: user._id, role: user.role },
             process.env.JWT_SECRET,
@@ -82,8 +185,7 @@ const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
-      
-        // Include isFirstLogin in the response
+        // Include credits, referenced channels, and isFirstLogin in the response
         res.status(200).json({
             success: true,
             message: 'Login successful',
@@ -93,14 +195,22 @@ const login = async (req, res) => {
                 username: user.username,
                 email: user.email,
                 role: user.role,
-                isFirstLogin: user.isFirstLogin,   
+                credits: credits,
+                isFirstLogin: user.isFirstLogin,
+                hasChannel: hasChannel,
+                channels: channels.length > 0 ? channels : [],
+                referenceChannels: referenceChannels.length > 0 ? referenceChannels : [],
+                userPlan: plan,
+                outdatedChannels,
             },
-            channels: channels.length > 0 ? channels : [],
         });
+
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: `Something went wrong`, error: err.message });
+        res.status(500).json({ message: `Login Fails`, error: err.message });
     }
 };
 
-module.exports = {register, login};
+
+
+module.exports = {register, login, logout};

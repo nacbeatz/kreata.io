@@ -1,20 +1,26 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: false,
-        unique: true, 
-    },
+    
     password: {
         type: String,
-        required: false,
-    },
+        // Required only if googleId is not provided
+        required: function() {
+          return !this.googleId;
+        }
+      },
     email: {
         type: String,
-        required: false,
+        required: true,
         unique: true,
-    },
+        trim: true,
+        lowercase: true
+      },
+      username: {
+        type: String,
+        required: true,
+        trim: true
+      },
     role: {
         type: String,
         enum: ['admin', 'creator', 'user'],
@@ -26,9 +32,11 @@ const userSchema = new mongoose.Schema({
     },
     googleId: {
         type: String,
-        required: false,
-        default: null,
-    },
+        sparse: true, 
+        unique: true,
+        index: true
+      },
+
     profilePicture: {
         type: String,
         required: false,
@@ -49,7 +57,14 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-
+// Compound index to ensure email uniqueness per auth method
+userSchema.index({ 
+    email: 1, 
+    googleId: 1 
+  }, { 
+    sparse: true,
+    unique: true 
+  });
 
 module.exports = mongoose.model('User', userSchema)
 

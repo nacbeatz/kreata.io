@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@font-face {
+    font-family: "EuclidCircular";
+    src: url("./fonts/EuclidCircularALight.ttf") format("truetype");
+    font-weight: 300; 
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "EuclidCircular";
+    src: url("./fonts/EuclidCircularARegular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "EuclidCircular";
+    src: url("./fonts/EuclidCircularABold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+body {
+    font-family: "EuclidCircular", sans-serif;
+}
+
+/* Hide scrollbar but keep scrolling functionality */
+.scrollbar-hidden {
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Edge */
+}
